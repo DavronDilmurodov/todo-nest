@@ -6,7 +6,10 @@ import {
   Param,
   Put,
   Delete,
+  ParseIntPipe,
+  Res,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { TodoService } from '../service/todo.service';
 
 @Controller('todo')
@@ -24,17 +27,21 @@ export class TodoController {
   }
 
   @Put(':id')
-  editTodo(@Param('id') id: number, @Body() body: any) {
-    return this.todoService.editTodo(id, body);
+  editTodo(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: any,
+    @Res() res: Response,
+  ) {
+    return this.todoService.editTodo(id, body, res);
   }
 
   @Put('isCompleted/:id')
-  isCompleted(@Param('id') id: number) {
-    return this.todoService.isCompleted(id);
+  isCompleted(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    return this.todoService.isCompleted(id, res);
   }
 
   @Delete(':id')
-  deleteTodo(@Param('id') id: number) {
-    return this.todoService.deleteTodo(id);
+  deleteTodo(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
+    return this.todoService.deleteTodo(id, res);
   }
 }

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { TodoType } from '../todo.type';
-import { ErrorType } from 'src/types/error.type';
-import { Io } from 'src/utils/io.utils';
+import { Io } from '../../utils/io.utils';
 import { resolve } from 'path';
+import { Response } from 'express';
+
 const TodoData = new Io(resolve('src', 'db', 'todos.json'));
 
 @Injectable()
@@ -39,17 +40,17 @@ export class TodoService {
     }
   }
 
-  async deleteTodo(id: number): Promise<object | ErrorType> {
+  async deleteTodo(id: number, res: Response): Promise<object | any> {
     try {
       let todos: TodoType[] = await TodoData.read();
 
-      const foundTodo = todos.find((t) => t.id == id);
+      const foundTodo = todos.find((t) => t.id === id);
       if (!foundTodo) {
-        return {
+        return res.status(404).json({
           message: 'Todo not found',
           error: 'NOT FOUND',
           statusCode: 404,
-        };
+        });
       }
 
       const filteredTodos = todos.filter((t) => t.id !== foundTodo.id);
@@ -67,18 +68,22 @@ export class TodoService {
     }
   }
 
-  async editTodo(id: number, body: any): Promise<TodoType | ErrorType> {
+  async editTodo(
+    id: number,
+    body: any,
+    res: Response,
+  ): Promise<TodoType | any> {
     try {
-      const todos = await TodoData.read();
+      const todos: TodoType[] = await TodoData.read();
 
-      const foundTodo = todos.find((t) => t.id == id);
+      const foundTodo = todos.find((t) => t.id === id);
 
       if (!foundTodo) {
-        return {
+        return res.status(404).json({
           message: 'Todo not found',
           error: 'NOT FOUND',
           statusCode: 404,
-        };
+        });
       }
 
       if (body.title && body.text) {
@@ -104,16 +109,16 @@ export class TodoService {
     }
   }
 
-  async isCompleted(id: number): Promise<TodoType | ErrorType> {
-    const todos = await TodoData.read();
+  async isCompleted(id: number, res: Response): Promise<TodoType | any> {
+    const todos: TodoType[] = await TodoData.read();
 
-    const foundTodo = todos.find((t) => t.id == id);
+    const foundTodo = todos.find((t) => t.id === id);
     if (!foundTodo) {
-      return {
+      return res.status(404).json({
         message: 'Todo not found',
         error: 'NOT FOUND',
         statusCode: 404,
-      };
+      });
     }
 
     foundTodo.isCompleted === false
